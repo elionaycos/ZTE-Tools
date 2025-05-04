@@ -13,6 +13,7 @@ from data import infile_bytes
 class ZTE_TOOLS:
     def __init__(self):
         parser = argparse.ArgumentParser()
+        
         parser.add_argument(
             "infile",
             type=argparse.FileType("rb"),
@@ -34,13 +35,23 @@ class ZTE_TOOLS:
             type=str,
             help="IV do seu roteador"
             )
+        parser.add_argument(
+            "--op",
+            type=argparse.FileType("rb"),
+            help="--op repack para recompilar a config.bin ou --op unpack para descompilar a config.bin"
+        )
         
+        
+        self.header = None
+        self.hedaer_compress = None
         args = parser.parse_args()
         
+        self.op = args.op
         self.serial = args.serial
-        self.infile = args.infile
         self.mac = args.mac
         self.aes_iv = args.iv
+        self.infile = args.infile
+        
         
     def gen_key(self):
         key_path_a = self.serial[-8:]
@@ -82,6 +93,8 @@ class ZTE_TOOLS:
             
             
     def decompress(self,infile):
+        self.hedaer_compress = infile.read(60)
+        
         infile.seek(60)
         dec_data = BytesIO()
         crc = 0
@@ -100,7 +113,9 @@ class ZTE_TOOLS:
         
         dec_data.seek(0)
         return (dec_data,crc)
-        
+    
+    def compress(self,infile):
+        pass
         
     def load_chunk(self):
         enc_data = BytesIO()
@@ -129,6 +144,9 @@ class ZTE_TOOLS:
         res.write(self.aes_cipher.decrypt(data.read())[:data_size])
         res.seek(0)
         return res
+    
+    def encrypt(self):
+        pass
 
 if __name__ == "__main__":
     zTools = ZTE_TOOLS()
