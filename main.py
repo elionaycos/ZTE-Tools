@@ -19,21 +19,40 @@ class ZTE_TOOLS:
             help="arquivo de configuração config.bin"
         )
         parser.add_argument(
-            "--key",
+            "--serial",
             type=str,
-            help="Chave AES Do roteador"
+            help="serial do seu roteador EX: ZTEXXXXXXXXX"
             )
+        parser.add_argument(
+            "--mac",
+            type=str,
+            help="Mac do seu roteador EX: XX:XX:XX:XX:XX:XX"
+            )
+        
         parser.add_argument(
             "--iv",
             type=str,
-            help="Chave IV Do roteador"
+            help="IV do seu roteador"
             )
         
         args = parser.parse_args()
         
-        self.aes_key = args.key
+        self.serial = args.serial
         self.infile = args.infile
+        self.mac = args.mac
         self.aes_iv = args.iv
+        
+    def gen_key(self):
+        key_path_a = self.serial[-8:]
+        key_path_b = ""
+        mac_str = (str(self.mac).lower()).split(":")
+        size_mac = len(mac_str)-1
+        while True:
+            key_path_b += mac_str[size_mac]
+            size_mac-=1
+            if size_mac == -1:
+                break
+        self.aes_key = key_path_a+key_path_b
     
     def save(self,name_path,data):
         data = data.read()
@@ -101,6 +120,7 @@ class ZTE_TOOLS:
         return enc_data
     
     def decrypt(self):
+        self.gen_key()
         self.set_key()
         data = self.load_chunk()
         data_size = data.tell()
@@ -116,3 +136,4 @@ if __name__ == "__main__":
     data_compress = zTools.decrypt()
     res,_ = zTools.decompress(data_compress)
     zTools.save("config_decrypt.xml",res)
+    
