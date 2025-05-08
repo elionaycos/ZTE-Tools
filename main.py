@@ -2,7 +2,8 @@
 
 from source.modules import *
 from source.decrypt import DECRYPT
-
+from source.encrypt import ENCRYPT
+from source.md5 import MD5
 
 class ZTE_TOOLS:
     def __init__(self):
@@ -13,22 +14,25 @@ class ZTE_TOOLS:
             type=argparse.FileType("rb"),
             help="arquivo de configuração config.bin"
         )
+        
         parser.add_argument(
             "--serial",
             type=str,
             help="serial do seu roteador EX: ZTEXXXXXXXXX"
-            )
+        )
+        
         parser.add_argument(
             "--mac",
             type=str,
             help="Mac do seu roteador EX: XX:XX:XX:XX:XX:XX"
-            )
+        )
         
         parser.add_argument(
             "--iv",
             type=str,
             help="IV do seu roteador"
-            )
+        )
+        
         parser.add_argument(
             "--op",
             type=str,
@@ -47,16 +51,12 @@ class ZTE_TOOLS:
             decrypt = DECRYPT(self.infile,self.serial,self.mac,self.aes_iv)
         
         elif self.op == "repack":
-            pass
-        
+            encrypt = ENCRYPT(self.infile,self.serial,self.mac)
+            MD5()
+            
         else:
             print("Invalid Op")
             exit()
         
-
-
-
-
-
 if __name__ == "__main__":
     ZTE_TOOLS()

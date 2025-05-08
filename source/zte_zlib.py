@@ -6,10 +6,12 @@ class ZTE_ZLIB:
         pass
         
     def decompress(self,infile):
-        self.hedaer_compress = infile.read(60)
-        ZTE_FILE("./data/header1.bin",self.hedaer_compress,binary=True).save()
-        
+        hedaer_compress = infile.read(60)
+        with open("datacom.txt","w") as f:
+            f.write(str(infile.read()))
         infile.seek(60)
+        
+        ZTE_FILE("./data/header1.bin",hedaer_compress,binary=True).save()
         dec_data = BytesIO()
         crc = 0
         while True:
@@ -24,6 +26,17 @@ class ZTE_ZLIB:
             dec_data.write(dec_chunk)
             if aes_header[2] == 0:
                 break
-        
         dec_data.seek(0)
         return (dec_data,crc)
+    
+    def compress(self,infile):
+        
+        hedaer_compress = open("./data/header1.bin","rb")
+        
+        com_data = BytesIO()
+        
+        data = zlib.compress(infile.read())
+        com_data.write(hedaer_compress.read())
+        com_data.write(data)
+        com_data.seek(0)
+        return com_data

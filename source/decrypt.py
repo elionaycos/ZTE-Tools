@@ -22,17 +22,25 @@ class DECRYPT:
     def __init__(self,infile,serial,mac,iv):
         self.infile = infile
         self.read_header()
+        
         aes = ZTE_AES(serial,mac,iv)
+        
         zte_zlib = ZTE_ZLIB()
+        
         aes_key = aes.get_key()
+        
         cipher = aes.get_cipher(aes_key)
+        
         chunk = CHUNK(self.infile)
+        
         data_chunk = chunk.load_chunk()
-        
-        
+                
         data_compress = self.decrypt(cipher,data_chunk)
+        
         res,_ = zte_zlib.decompress(data_compress)
+        
         ZTE_FILE("config.xml",res).save()
+        
         print("Success in decompile Config.bin Output config.xml")
         
     

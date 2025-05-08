@@ -6,7 +6,7 @@ class ZTE_FILE:
     
     def save(self):
         if isinstance(self.data,bytes):
-            print("ok")
+            pass
         else:
             self.data = self.data.read()
             
@@ -17,9 +17,19 @@ class ZTE_FILE:
                 self.data = bytes(self.data,"UTF-8")
         else:
             if isinstance(self.data,bytes):
-                self.data = bytes(self.data).decode()
-        
-        print(self.name_path)
-        print(mod)
+                try:
+                    self.data = bytes(self.data).decode()
+                except:
+                    self.data = bytes(self.data).decode("LATIN-1")
         with open(self.name_path,mod) as f:
                 f.write(self.data)
+    
+    def open(self,name_path,binary):    
+        mod = "r"
+        if binary:
+            mod = "rb"
+        
+        with open(name_path,mod) as f:
+                data =  f.read(self.data)
+        
+        return data
