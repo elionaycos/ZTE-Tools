@@ -1,9 +1,10 @@
 from source.modules import *
 from source.zte_file import ZTE_FILE
+from source.zte_aes import ZTE_AES
 
 class ZTE_ZLIB:
-    def __init__(self):
-        pass
+    def __init__(self,serial,mac,aes_iv=None):
+        self.zte_aes = ZTE_AES(serial=serial,mac=mac,aes_iv=aes_iv)
         
     def decompress(self,infile):
         hedaer_compress = infile.read(60)
@@ -32,11 +33,41 @@ class ZTE_ZLIB:
     def compress(self,infile):
         
         hedaer_compress = open("./data/header1.bin","rb")
+        un_data = infile.read()
         
+        un_length = len(un_data)
+        
+        #if un_length % 16> 0:
+        #   data = data+(16-un_length%16)*b"\0"
+        
+        key =  self.zte_aes.get_key()
+        aes_cipher = self.zte_aes.get_cipher(key)
+        
+        encry_data_len = len(aes_cipher.encrypt(pad(un_data, AES.block_size)))
+        
+        aes_header = struct.pack(
+            ">3I",
+            *(
+                (
+                encry_data_len
+                if True
+                else un_length
+                ),
+            ),
+            encry_data_len,
+            0,
+        )
+        
+        data = BytesIO()
         com_data = BytesIO()
         
-        data = zlib.compress(infile.read())
-        com_data.write(hedaer_compress.read())
-        com_data.write(data)
+        
+        data.write(hedaer_compress.read())
+        data.write(struct.pack(">9I",*(9*[0])))
+        data.write(aes_header)
+        data.write(un_data)
+        data.seek(0)
+        
+        com_data.write(zlib.compress(data.read()))
         com_data.seek(0)
         return com_data
